@@ -1,4 +1,4 @@
-package com.meisterdevs;
+package com.meisterdevs.a;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

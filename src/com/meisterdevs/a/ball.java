@@ -1,4 +1,4 @@
-package com.meisterdevs;
+package com.meisterdevs.a;
 
 import java.util.ArrayList;
 import java.util.List;
