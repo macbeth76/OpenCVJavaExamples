@@ -11,32 +11,45 @@ import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
-public class Face {
+public class SimpleCircle {
+	
+	public static int WIDTH = 400;
+	public static int HEIGHT = 300;
+	
+	
+	
+	
 	public static void main(String arg[]) {
 		// Load the native library.
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		String window_name = "Capture - Face detection";
+		String window_name = "Find Circle";
 		JFrame frame = new JFrame(window_name);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(400, 400);
+		frame.setSize(SimpleCircle.WIDTH+20, SimpleCircle.HEIGHT+20);
 		My_Panel my_panel = new My_Panel();
 		frame.setContentPane(my_panel);
 		frame.setVisible(true);
+		
+		JFrame frame2 = new JFrame("H");
+		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame2.setSize(SimpleCircle.WIDTH+20, SimpleCircle.HEIGHT+20);
+		My_Panel my_panel2 = new My_Panel();
+		frame2.setContentPane(my_panel2);
+		frame2.setVisible(true);
 		// -- 2. Read the video stream
 		Mat webcam_image = new Mat();
 		VideoCapture capture = new VideoCapture(-1);
-		capture.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, 400);
-		capture.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, 400);
+		capture.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, SimpleCircle.HEIGHT);
+		capture.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, SimpleCircle.WIDTH);
 		if (capture.isOpened()) {
 			while (true) {
-				// capture.set(, value)
 				capture.read(webcam_image);
 				if (!webcam_image.empty()) {
-					Mat dst = new Mat();
-					//Imgproc.resize(webcam_image, dst, new Size(), 0.5, 0.5, 2);
-					frame.setSize(2 * dst.width() + 40, 2 * dst.height() + 60);
+					
+					//resize(webcam_image);
+					frame.setSize(2 * webcam_image.width() + 20, 2 * webcam_image.height() + 20);
 					// -- 3. Apply the classifier to the captured image
-					// webcam_image = my_processor.detect(dst);
+				
 					int iCannyUpperThreshold = 100;
 					int iMinRadius = 1;
 					int iMaxRadius = 400;
@@ -48,8 +61,9 @@ public class Face {
 					Mat thresholdImage = new Mat();
 					// ## TODO: Uninitialized? Should at least be allocated
 					// webcam_image.size, or shallow/deep copy webcam_image
-					Mat destination = new Mat();
-					Imgproc.cvtColor(dst, thresholdImage, Imgproc.COLOR_BGR2GRAY);
+					
+					Imgproc.cvtColor(webcam_image, thresholdImage, Imgproc.COLOR_BGR2GRAY);
+					Imgproc.GaussianBlur(thresholdImage, thresholdImage, new Size(9, 9), 2, 2);
 					Imgproc.HoughCircles(thresholdImage, circles, Imgproc.CV_HOUGH_GRADIENT, 2.0,
 							thresholdImage.rows() / 8, iCannyUpperThreshold, iAccumulator, iMinRadius, iMaxRadius);
 
@@ -59,26 +73,19 @@ public class Face {
 
 							if (vCircle == null)
 								break;
-
+							
 							Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
 							int radius = (int) Math.round(vCircle[2]);
-
-							// draw the found circle...
-							// Core.circle(destination, pt, radius, new
-							// Scalar(0, 255, 0), iLineThickness);
-							// Core.circle(destination, pt, 3, new Scalar(0, 0,
-							// 255), iLineThickness);
-							// ## Onto webcam_image, not destination (since not
-							// allocated) with green.
 							Core.circle(webcam_image, pt, radius, new Scalar(0, 255, 0), iLineThickness);
-							// ## Buffer circled webcam_image to panel
-							// my_panel.MatToBufferedImage(destination);
 							my_panel.MatToBufferedImage(webcam_image);
 						}
 					else {
 						// -- 4. Display the image
-						my_panel.MatToBufferedImage(dst);
+						my_panel.MatToBufferedImage(webcam_image);
 					}
+					frame2.setSize(2 * thresholdImage.width() + 20, 2 * thresholdImage.height() + 20);
+					my_panel2.MatToBufferedImage(thresholdImage);
+					my_panel2.repaint();
 					// ## Redraw panel with new circled image.
 					my_panel.repaint();
 				} else {
@@ -88,5 +95,13 @@ public class Face {
 			}
 		}
 		return;
+	}
+
+
+
+
+	private static void resize(Mat image) {
+		Imgproc.resize(image, image, new Size(), 0.5, 0.5, 2);
+		
 	}
 }
