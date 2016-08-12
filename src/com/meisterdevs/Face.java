@@ -39,9 +39,12 @@ public class Face {
 					int iMinRadius = 20;
 					int iMaxRadius = 400;
 					int iAccumulator = 300;
-					int iLineThickness = 100;
+          // ## Lower thickness
+          // int iLineThickness = 100;
+					int iLineThickness = 5;
 					Mat circles = new Mat();
 					Mat thresholdImage = new Mat();
+          // ## TODO: Uninitialized? Should at least be allocated webcam_image.size, or shallow/deep copy webcam_image
 					Mat destination = new Mat();
 					Imgproc.cvtColor(dst, thresholdImage, Imgproc.COLOR_BGR2GRAY);
 					Imgproc.HoughCircles(thresholdImage, circles, Imgproc.CV_HOUGH_GRADIENT, 2.0,
@@ -57,18 +60,20 @@ public class Face {
 							Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
 							int radius = (int) Math.round(vCircle[2]);
 
-							// draw the found circle
-							Core.circle(destination, pt, radius, new Scalar(0, 255, 0), iLineThickness);
-							Core.circle(destination, pt, 3, new Scalar(0, 0, 255), iLineThickness);
-							my_panel.MatToBufferedImage(destination);
+              // draw the found circle...
+              // Core.circle(destination, pt, radius, new Scalar(0, 255, 0), iLineThickness);
+              // Core.circle(destination, pt, 3, new Scalar(0, 0, 255), iLineThickness);
+              // ## Onto webcam_image, not destination (since not allocated) with green.
+              Core.circle(webcam_image, pt, radius, new Scalar(0, 255, 0), iLineThickness);
+              // ## Buffer circled webcam_image to panel
+              // my_panel.MatToBufferedImage(destination);
+              my_panel.MatToBufferedImage(webcam_image);
 						}
-					// -- 4. Display the image
-
 					else {
 						// -- 4. Display the image
 						my_panel.MatToBufferedImage(dst);
 					}
-
+          // ## Redraw panel with new circled image.
 					my_panel.repaint();
 				} else {
 					System.out.println(" --(!) No captured frame -- Break!");
